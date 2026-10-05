@@ -8,7 +8,8 @@
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
     body { background: linear-gradient(135deg, #0b192c 0%, #1a365d 100%); color: #fff; min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 20px; }
-    .glass-card { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 20px; padding: 25px; width: 100%; max-width: 450px; text-align: center; box-shadow: 0 8px 32px rgba(0,0,0,0.3); }
+    .glass-card { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 20px; padding: 25px; width: 100%; max-width: 480px; text-align: center; box-shadow: 0 8px 32px rgba(0,0,0,0.3); }
+    .glass-card.wide { max-width: 800px; }
     .logo { max-width: 120px; margin-bottom: 15px; }
     h2 { font-size: 19px; margin-bottom: 20px; color: #e2e8f0; }
     .form-group { margin-bottom: 15px; text-align: left; }
@@ -20,11 +21,8 @@
     .btn { width: 100%; padding: 14px; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); border: none; border-radius: 10px; color: white; font-weight: bold; cursor: pointer; margin-top: 10px; transition: 0.3s; }
     .btn:hover { background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%); }
     .btn:disabled { background: #64748b; cursor: not-allowed; }
-    
     .btn-secondary { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.3); margin-right: 10px; }
-    .btn-secondary:hover { background: rgba(255,255,255,0.2); }
     .btn-success { background: linear-gradient(135deg, #10b981 0%, #059669 100%); }
-    .btn-success:hover { background: linear-gradient(135deg, #34d399 0%, #10b981 100%); }
     
     .link { color: #60a5fa; cursor: pointer; font-size: 13px; margin-top: 15px; display: block; text-decoration: underline; }
     .camera-container { width: 100%; border-radius: 10px; overflow: hidden; margin-bottom: 12px; border: 1px solid rgba(255,255,255,0.2); position: relative; background: #000; min-height: 220px;}
@@ -32,26 +30,31 @@
     canvas { display: none; }
     .status-text { font-size: 12px; margin-bottom: 15px; color: #94a3b8; }
     
-    /* Desain Profil & Logout Profesional */
-    .user-profile-card { background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255, 255, 255, 0.12); padding: 12px 16px; border-radius: 14px; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; box-shadow: inset 0 2px 4px rgba(0,0,0,0.2); }
+    .user-profile-card { background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255, 255, 255, 0.12); padding: 12px 16px; border-radius: 14px; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; }
     .user-meta { text-align: left; }
-    .user-meta .role { font-size: 11px; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; }
+    .user-meta .role { font-size: 11px; color: #38bdf8; text-transform: uppercase; font-weight: bold; letter-spacing: 0.5px; }
     .user-meta .name { font-size: 15px; font-weight: 600; color: #f8fafc; }
-    .logout-btn { background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.4); color: #f87171; padding: 6px 12px; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; transition: 0.2s; }
+    .logout-btn { background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.4); color: #f87171; padding: 6px 12px; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; }
     .logout-btn:hover { background: rgba(239, 68, 68, 0.3); color: #fff; }
 
-    /* Riwayat di Atas */
     .history-box { margin-bottom: 20px; text-align: left; background: rgba(0,0,0,0.25); padding: 12px 15px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.08); }
-    .history-box h3 { font-size: 13px; margin-bottom: 8px; color: #cbd5e1; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 4px; }
-    .history-list { list-style: none; font-size: 12px; color: #94a3b8; max-height: 80px; overflow-y: auto; }
+    .history-box h3 { font-size: 13px; margin-bottom: 8px; color: #cbd5e1; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 4px; }
+    .history-list { list-style: none; font-size: 12px; color: #94a3b8; max-height: 70px; overflow-y: auto; }
     .history-list li { margin-bottom: 4px; padding-bottom: 4px; border-bottom: 1px dashed rgba(255,255,255,0.05); }
 
-    /* Container Maps */
+    .table-container { overflow-x: auto; margin-top: 15px; max-height: 300px; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; text-align: left; }
+    th, td { padding: 10px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+    th { background: rgba(255,255,255,0.1); color: #60a5fa; }
+    .action-btn { background: #3b82f6; border: none; padding: 5px 10px; color: white; border-radius: 6px; cursor: pointer; font-size: 11px; }
+    .action-btn:hover { background: #2563eb; }
+    
     #mapView { display: none; width: 100%; border-radius: 10px; overflow: hidden; margin-top: 15px; border: 1px solid rgba(255,255,255,0.2); }
   </style>
 </head>
 <body>
 
+  <!-- LAYER LOGIN -->
   <div class="glass-card" id="loginCard">
     <img src="https://drive.google.com/thumbnail?id=1zHUoEV99QjdI2T8hJpR_TPxpJJySUMh8&sz=w500" alt="Logo" class="logo">
     <h2>Login Presensi</h2>
@@ -61,20 +64,21 @@
     <span class="link" onclick="toggleView('registerCard')">Belum punya akun? Buat Akun</span>
   </div>
 
+  <!-- LAYER REGISTER -->
   <div class="glass-card" id="registerCard" style="display: none;">
     <img src="https://drive.google.com/thumbnail?id=1zHUoEV99QjdI2T8hJpR_TPxpJJySUMh8&sz=w500" alt="Logo" class="logo">
     <h2>Buat Akun Baru</h2>
     <div class="form-group"><label>Nama Lengkap</label><input type="text" id="regName" placeholder="Nama sesuai KTP"></div>
-    <div class="form-group"><label>Email</label><input type="email" id="regEmail" placeholder="email@paragon.com"></div>
+    <div class="form-group"><label>Email</label><input type="email" id="regEmail" placeholder="email@paracorpgroup.com"></div>
     <div class="form-group"><label>Password</label><input type="password" id="regPass" placeholder="******"></div>
     <button class="btn" id="btnReg" onclick="register()">Daftar</button>
     <span class="link" onclick="toggleView('loginCard')">Sudah punya akun? Login</span>
   </div>
 
+  <!-- LAYER OPERATOR -->
   <div class="glass-card" id="appCard" style="display: none;">
     <img src="https://drive.google.com/thumbnail?id=1zHUoEV99QjdI2T8hJpR_TPxpJJySUMh8&sz=w500" alt="Logo" class="logo" style="max-width: 90px; margin-bottom: 10px;">
     
-    <!-- Profil & Logout Profesional di Atas -->
     <div class="user-profile-card">
       <div class="user-meta">
         <span class="role">Operator Gudang</span>
@@ -83,7 +87,6 @@
       <button class="logout-btn" onclick="logout()">Keluar</button>
     </div>
 
-    <!-- Riwayat Dipindah ke Atas -->
     <div class="history-box">
       <h3><span>📜 Riwayat Hari Ini</span></h3>
       <ul class="history-list" id="historyList"></ul>
@@ -97,13 +100,20 @@
       </select>
     </div>
 
-    <!-- Area Kamera -->
+    <div class="form-group" id="shiftGroup">
+      <label>Shift Kerja</label>
+      <select id="shift">
+        <option value="Shift Pagi">Shift Pagi</option>
+        <option value="Shift Siang">Shift Siang</option>
+        <option value="Shift Malam">Shift Malam</option>
+      </select>
+    </div>
+
     <div class="camera-container">
       <video id="video" autoplay playsinline muted></video>
       <canvas id="canvas"></canvas>
     </div>
 
-    <!-- Tombol Ambil Foto Berada Tepat di Bawah Kamera -->
     <button class="btn" id="btnCapture" onclick="capturePhoto()">📸 Ambil Foto</button>
 
     <div id="btnActionArea" style="display: none; justify-content: space-between; margin-top: 10px;">
@@ -111,35 +121,110 @@
       <button class="btn btn-success" id="btnSubmit" onclick="submitPresensi()" style="flex: 2;">🚀 Kirim Presensi</button>
     </div>
 
-    <!-- Status & Maps GPS di Bagian Bawah -->
     <div class="status-text" id="statusMsg" style="margin-top: 15px;">Mencari lokasi GPS... ⏳</div>
     <div id="mapView"></div>
+  </div>
+
+  <!-- LAYER SUPER USER (ADMIN) -->
+  <div class="glass-card wide" id="superCard" style="display: none;">
+    <img src="https://drive.google.com/thumbnail?id=1zHUoEV99QjdI2T8hJpR_TPxpJJySUMh8&sz=w500" alt="Logo" class="logo" style="max-width: 90px;">
+    
+    <div class="user-profile-card">
+      <div class="user-meta">
+        <span class="role">👑 Super User / Admin</span>
+        <div class="name" id="displaySuperUser">Admin</div>
+      </div>
+      <button class="logout-btn" onclick="logout()">Keluar</button>
+    </div>
+
+    <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+      <button class="btn" style="margin-top:0;" onclick="switchTab('reportTab')">📊 Monitoring Kehadiran</button>
+      <button class="btn" style="margin-top:0; background: rgba(255,255,255,0.1);" onclick="switchTab('usersTab')">👥 Master Data Users</button>
+    </div>
+
+    <!-- TAB 1: LAPORAN -->
+    <div id="reportTab">
+      <div class="form-group" style="display: flex; gap: 10px; align-items: center;">
+        <label style="margin:0;">Filter Shift:</label>
+        <select id="filterShift" onchange="renderReport()" style="padding: 6px;">
+          <option value="ALL">Semua Shift</option>
+          <option value="Shift Pagi">Shift Pagi</option>
+          <option value="Shift Siang">Shift Siang</option>
+          <option value="Shift Malam">Shift Malam</option>
+        </select>
+      </div>
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Tanggal</th>
+              <th>Nama</th>
+              <th>Shift</th>
+              <th>Jam In</th>
+              <th>Jam Out</th>
+            </tr>
+          </thead>
+          <tbody id="reportTableBody">
+            <tr><td colspan="5" style="text-align:center;">Memuat data...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- TAB 2: USERS & RESET PASSWORD -->
+    <div id="usersTab" style="display: none;">
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Nama</th>
+              <th>Email</th>
+              <th>Role</th>
+              <th>Aksi</th>
+            </tr>
+          </thead>
+          <tbody id="usersTableBody">
+            <tr><td colspan="4" style="text-align:center;">Memuat data...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
   </div>
 
   <script>
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyjFOwDPUh0EPzSSHy4JgqZaZU1x6bVeUZUqQzcVPzGaO56qrgcXE2HelTks3MvO3T8/exec";
     let userName = localStorage.getItem("userName");
+    let userRole = localStorage.getItem("userRole");
     let userLat = null, userLng = null;
     let finalPhotoData = null;
+    let globalReportData = [];
 
     if(userName) {
-      toggleView('appCard');
-      document.getElementById('displayUser').innerText = userName;
-      initHardware();
-      renderHistory();
+      if(userRole === 'super') {
+        toggleView('superCard');
+        document.getElementById('displaySuperUser').innerText = userName;
+        loadSuperData();
+      } else {
+        toggleView('appCard');
+        document.getElementById('displayUser').innerText = userName;
+        initHardware();
+        checkAndCleanHistory();
+        renderHistory();
+      }
     }
 
     function toggleView(viewId) {
       document.getElementById('loginCard').style.display = 'none';
       document.getElementById('registerCard').style.display = 'none';
       document.getElementById('appCard').style.display = 'none';
+      document.getElementById('superCard').style.display = 'none';
       document.getElementById(viewId).style.display = 'block';
     }
 
     async function sendData(payload, btnId, loadingText) {
-      const btn = document.getElementById(btnId);
-      const originalText = btn.innerHTML;
-      btn.disabled = true; btn.innerHTML = loadingText;
+      let btn = btnId ? document.getElementById(btnId) : null;
+      let originalText = btn ? btn.innerHTML : '';
+      if(btn) { btn.disabled = true; btn.innerHTML = loadingText; }
       
       try {
         const res = await fetch(SCRIPT_URL, {
@@ -149,11 +234,11 @@
           body: JSON.stringify(payload)
         });
         const data = await res.json();
-        btn.disabled = false; btn.innerHTML = originalText;
+        if(btn) { btn.disabled = false; btn.innerHTML = originalText; }
         return data;
       } catch(e) {
-        btn.disabled = false; btn.innerHTML = originalText;
-        Swal.fire('Error Network', 'Koneksi terputus atau Script perlu di-Deploy ulang (Versi Baru).', 'error');
+        if(btn) { btn.disabled = false; btn.innerHTML = originalText; }
+        Swal.fire('Error Network', 'Koneksi terputus atau Script perlu di-Deploy ulang.', 'error');
         return null;
       }
     }
@@ -177,15 +262,35 @@
       const res = await sendData({ action: 'login', email, password: pass }, 'btnLogin', 'Login...');
       if(res && res.success) {
         localStorage.setItem("userName", res.name);
-        userName = res.name;
-        document.getElementById('displayUser').innerText = userName;
-        toggleView('appCard');
-        initHardware();
-        renderHistory();
+        localStorage.setItem("userRole", res.role);
+        
+        if(res.role === 'super') {
+          toggleView('superCard');
+          document.getElementById('displaySuperUser').innerText = res.name;
+          loadSuperData();
+        } else {
+          toggleView('appCard');
+          document.getElementById('displayUser').innerText = res.name;
+          initHardware();
+          checkAndCleanHistory();
+          renderHistory();
+        }
       } else if(res) Swal.fire('Gagal', res.message, 'error');
     }
 
-    function logout() { localStorage.removeItem("userName"); window.location.reload(); }
+    function logout() { 
+      localStorage.clear(); 
+      window.location.reload(); 
+    }
+
+    document.getElementById('type').addEventListener('change', function() {
+      const shiftGroup = document.getElementById('shiftGroup');
+      if(this.value === 'OUT') {
+        shiftGroup.style.display = 'none';
+      } else {
+        shiftGroup.style.display = 'block';
+      }
+    });
 
     function initHardware() {
       if (navigator.geolocation) {
@@ -218,6 +323,7 @@
       const video = document.getElementById('video');
       const canvas = document.getElementById('canvas');
       const type = document.getElementById('type').value;
+      const shift = document.getElementById('shift').value;
       
       const MAX_WIDTH = 400; 
       const scale = MAX_WIDTH / video.videoWidth;
@@ -228,11 +334,11 @@
       ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
       
       ctx.fillStyle = "rgba(0, 0, 0, 0.6)"; 
-      ctx.fillRect(0, canvas.height - 50, canvas.width, 50);
-      ctx.font = "12px Arial"; ctx.fillStyle = "#ffffff";
+      ctx.fillRect(0, canvas.height - 55, canvas.width, 55);
+      ctx.font = "11px Arial"; ctx.fillStyle = "#ffffff";
       const timeStr = new Date().toLocaleString('id-ID');
-      ctx.fillText(userName + " | " + type, 10, canvas.height - 30);
-      ctx.fillText(timeStr + " | " + userLat.toFixed(5) + "," + userLng.toFixed(5), 10, canvas.height - 10);
+      ctx.fillText(`${userName} | ${type} (${type==='IN'?shift:''})`, 10, canvas.height - 35);
+      ctx.fillText(`${timeStr} | ${userLat.toFixed(5)},${userLng.toFixed(5)}`, 10, canvas.height - 15);
 
       finalPhotoData = canvas.toDataURL('image/jpeg', 0.6);
 
@@ -255,7 +361,8 @@
     async function submitPresensi() {
       if (!finalPhotoData) return;
       const type = document.getElementById('type').value;
-      const payload = { action: 'attend', name: userName, type: type, lat: userLat, lng: userLng, photo: finalPhotoData };
+      const shift = document.getElementById('shift').value;
+      const payload = { action: 'attend', name: userName, type: type, shift: shift, lat: userLat, lng: userLng, photo: finalPhotoData };
 
       const res = await sendData(payload, 'btnSubmit', 'Mengupload... ⏳');
       if (res && res.success) {
@@ -264,6 +371,15 @@
         retakePhoto(); 
       } else if (res) {
         Swal.fire('Perhatian', res.message, 'warning');
+      }
+    }
+
+    function checkAndCleanHistory() {
+      let todayKey = new Date().toLocaleDateString();
+      let lastDate = localStorage.getItem('hist_date_' + userName);
+      if(lastDate !== todayKey) {
+        localStorage.removeItem('hist_' + userName);
+        localStorage.setItem('hist_date_' + userName, todayKey);
       }
     }
 
@@ -286,6 +402,78 @@
         const color = h.type === 'IN' ? '#4ade80' : '#f87171';
         list.innerHTML += `<li><b style="color:${color}">[${h.type}]</b> ${h.time}</li>`;
       });
+    }
+
+    function switchTab(tabId) {
+      document.getElementById('reportTab').style.display = tabId === 'reportTab' ? 'block' : 'none';
+      document.getElementById('usersTab').style.display = tabId === 'usersTab' ? 'block' : 'none';
+    }
+
+    async function loadSuperData() {
+      const resRep = await sendData({ action: 'getReport' }, null, '');
+      if(resRep && resRep.success) {
+        globalReportData = resRep.report;
+        renderReport();
+      }
+
+      const resUsr = await sendData({ action: 'getUsers' }, null, '');
+      if(resUsr && resUsr.success) {
+        const tbody = document.getElementById('usersTableBody');
+        tbody.innerHTML = '';
+        resUsr.users.forEach(u => {
+          tbody.innerHTML += `<tr>
+            <td>${u.name}</td>
+            <td>${u.email}</td>
+            <td><b>${u.role}</b></td>
+            <td><button class="action-btn" onclick="promptResetPassword('${u.email}')">Reset Pass</button></td>
+          </tr>`;
+        });
+      }
+    }
+
+    function renderReport() {
+      const shiftFilter = document.getElementById('filterShift').value;
+      const tbody = document.getElementById('reportTableBody');
+      tbody.innerHTML = '';
+
+      let filtered = globalReportData;
+      if(shiftFilter !== 'ALL') {
+        filtered = globalReportData.filter(r => r.shift === shiftFilter);
+      }
+
+      if(filtered.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;">Tidak ada data presensi.</td></tr>`;
+        return;
+      }
+
+      filtered.forEach(r => {
+        tbody.innerHTML += `<tr>
+          <td>${r.timestamp.substring(0,10)}</td>
+          <td>${r.name}</td>
+          <td>${r.shift}</td>
+          <td><span style="color:#4ade80">${r.timeIn}</span></td>
+          <td><span style="color:#f87171">${r.timeOut}</span></td>
+        </tr>`;
+      });
+    }
+
+    async function promptResetPassword(email) {
+      const { value: newPass } = await Swal.fire({
+        title: 'Reset Password untuk ' + email,
+        input: 'text',
+        inputPlaceholder: 'Masukkan password baru...',
+        showCancelButton: true,
+        confirmButtonText: 'Simpan'
+      });
+
+      if (newPass) {
+        const res = await sendData({ action: 'resetPassword', targetEmail: email, newPassword: newPass }, null, '');
+        if(res && res.success) {
+          Swal.fire('Berhasil', res.message, 'success');
+        } else {
+          Swal.fire('Gagal', res.message || 'Terjadi kesalahan', 'error');
+        }
+      }
     }
   </script>
 </body>
