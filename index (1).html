@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Presensi Paragon NDC</title>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
+    body {
+      background: linear-gradient(135deg, #0b192c 0%, #1a365d 100%);
+      color: #fff; min-height: 100vh;
+      display: flex; justify-content: center; align-items: center; padding: 20px;
+    }
+    .glass-card {
+      background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(15px);
+      border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 20px;
+      padding: 30px; width: 100%; max-width: 450px; text-align: center;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+    }
+    .logo { max-width: 130px; margin-bottom: 20px; }
+    h2 { font-size: 20px; margin-bottom: 25px; color: #e2e8f0; }
+    .form-group { margin-bottom: 15px; text-align: left; }
+    label { display: block; margin-bottom: 8px; font-size: 13px; color: #cbd5e1; }
+    input, select {
+      width: 100%; padding: 12px; background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 10px; color: #fff;
+      font-size: 15px; outline: none; transition: 0.3s;
+    }
+    input:focus, select:focus { border-color: #60a5fa; background: rgba(255,255,255, 0.15); }
+    option { background: #1a365d; color: #fff; }
+    
+    .btn {
+      width: 100%; padding: 14px; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+      border: none; border-radius: 10px; color: white; font-weight: bold; cursor: pointer;
+      margin-top: 10px; transition: 0.3s;
+    }
+    .btn:hover { background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%); }
+    .btn:disabled { background: #64748b; cursor: not-allowed; }
+    .link { color: #60a5fa; cursor: pointer; font-size: 13px; margin-top: 15px; display: block; text-decoration: underline; }
+    
+    /* Area Kamera */
+    .camera-container {
+      width: 100%; border-radius: 10px; overflow: hidden; margin-bottom: 15px;
+      border: 1px solid rgba(255,255,255,0.2); position: relative; background: #000;
+    }
+    video { width: 100%; display: block; }
+    canvas { display: none; }
+    .status-text { font-size: 12px; margin-top: 10px; color: #94a3b8; }
+    .user-info { background: rgba(0,0,0,0.3); padding: 10px; border-radius: 10px; margin-bottom: 15px; font-size: 14px; }
+  </style>
+</head>
+<body>
+
+  <!-- LAYER LOGIN -->
+  <div class="glass-card" id="loginCard">
+    <img src="https://drive.google.com/thumbnail?id=1zHUoEV99QjdI2T8hJpR_TPxpJJySUMh8&sz=w500" alt="Logo" class="logo">
+    <h2>Login Presensi</h2>
+    <div class="form-group">
+      <label>Email</label>
+      <input type="email" id="logEmail" placeholder="email@paragon.com">
+    </div>
+    <div class="form-group">
+      <label>Password</label>
+      <input type="password" id="logPass" placeholder="******">
+    </div>
+    <button class="btn" id="btnLogin" onclick="login()">Masuk</button>
+    <span class="link" onclick="toggleView('registerCard')">Belum punya akun? Buat Akun</span>
+  </div>
+
+  <!-- LAYER REGISTER -->
+  <div class="glass-card" id="registerCard" style="display: none;">
+    <img src="https://drive.google.com/thumbnail?id=1zHUoEV99QjdI2T8hJpR_TPxpJJySUMh8&sz=w500" alt="Logo" class="logo">
+    <h2>Buat Akun Baru</h2>
+    <div class="form-group">
+      <label>Nama Lengkap</label>
+      <input type="text" id="regName" placeholder="Nama sesuai KTP/ID">
+    </div>
+    <div class="form-group">
+      <label>Email</label>
+      <input type="email" id="regEmail" placeholder="email@paragon.com">
+    </div>
+    <div class="form-group">
+      <label>Password</label>
+      <input type="password" id="regPass" placeholder="******">
+    </div>
+    <button class="btn" id="btnReg" onclick="register()">Daftar</button>
+    <span class="link" onclick="toggleView('loginCard')">Sudah punya akun? Login</span>
+  </div>
+
+  <!-- LAYER PRESENSI (UTAMA) -->
+  <div class="glass-card" id="appCard" style="display: none;">
+    <img src="https://drive.google.com/thumbnail?id=1zHUoEV99QjdI2T8hJpR_TPxpJJySUMh8&sz=w500" alt="Logo" class="logo">
+    <h2>Presensi Gudang Sewa</h2>
+    
+    <div class="user-info">
+      Operator: <b id="displayUser"></b> <br>
+      <span class="link" style="display:inline; color:#f87171;" onclick="logout()">[Logout]</span>
+    </div>
+
+    <div class="form-group">
+      <label>Tipe Presensi</label>
+      <select id="type">
+        <option value="IN">CLOCK IN (Masuk)</option>
+        <option value="OUT">CLOCK OUT (Pulang)</option>
+      </select>
+    </div>
+
+    <div class="camera-container">
+      <video id="video" autoplay playsinline muted></video>
+      <canvas id="canvas"></canvas>
+    </div>
+
+    <button class="btn" id="submitBtn" onclick="submitPresensi()">📸 Ambil Foto & Submit</button>
+    <div class="status-text" id="statusMsg">Mencari lokasi GPS... 📍</div>
+  </div>
+
+  <script>
+    // URL API sudah terpasang di bawah ini
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyjFOwDPUh0EPzSSHy4JgqZaZU1x6bVeUZUqQzcVPzGaO56qrgcXE2HelTks3MvO3T8/exec";
+
+    let userName = localStorage.getItem("userName");
+    let userLat = null, userLng = null;
+
+    // Cek Sesi Login saat buka web
+    if(userName) {
+      toggleView('appCard');
+      document.getElementById('displayUser').innerText = userName;
+      initHardware();
+    }
+
+    function toggleView(viewId) {
+      document.getElementById('loginCard').style.display = 'none';
+      document.getElementById('registerCard').style.display = 'none';
+      document.getElementById('appCard').style.display = 'none';
+      document.getElementById(viewId).style.display = 'block';
+    }
+
+    // --- FUNGSI AUTH ---
+    async function sendData(payload, btnId, loadingText) {
+      const btn = document.getElementById(btnId);
+      const originalText = btn.innerHTML;
+      btn.disabled = true; btn.innerHTML = loadingText;
+      
+      try {
+        const res = await fetch(SCRIPT_URL, {
+          method: "POST",
+          headers: { "Content-Type": "text/plain" },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        btn.disabled = false; btn.innerHTML = originalText;
+        return data;
+      } catch(e) {
+        btn.disabled = false; btn.innerHTML = originalText;
+        Swal.fire('Error Network', 'Gagal menghubungi server.', 'error');
+        return null;
+      }
+    }
+
+    async function register() {
+      const name = document.getElementById('regName').value;
+      const email = document.getElementById('regEmail').value;
+      const pass = document.getElementById('regPass').value;
+      if(!name || !email || !pass) return Swal.fire('Oops','Lengkapi semua data','warning');
+
+      const res = await sendData({ action: 'register', name, email, password: pass }, 'btnReg', 'Mendaftar...');
+      if(res && res.success) {
+        Swal.fire('Berhasil!', res.message, 'success').then(() => toggleView('loginCard'));
+      } else if (res) {
+        Swal.fire('Gagal', res.message, 'error');
+      }
+    }
+
+    async function login() {
+      const email = document.getElementById('logEmail').value;
+      const pass = document.getElementById('logPass').value;
+      if(!email || !pass) return Swal.fire('Oops','Isi email dan password','warning');
+
+      const res = await sendData({ action: 'login', email, password: pass }, 'btnLogin', 'Login...');
+      if(res && res.success) {
+        localStorage.setItem("userName", res.name);
+        userName = res.name;
+        document.getElementById('displayUser').innerText = userName;
+        toggleView('appCard');
+        initHardware();
+      } else if(res) {
+        Swal.fire('Gagal', res.message, 'error');
+      }
+    }
+
+    function logout() {
+      localStorage.removeItem("userName");
+      window.location.reload();
+    }
+
+    // --- FUNGSI HARDWARE (Kamera & GPS) ---
+    function initHardware() {
+      // 1. GPS
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          pos => { userLat = pos.coords.latitude; userLng = pos.coords.longitude; document.getElementById('statusMsg').innerHTML = "📍 GPS Siap!"; document.getElementById('statusMsg').style.color = "#4ade80"; },
+          err => { document.getElementById('statusMsg').innerHTML = "❌ Izin lokasi ditolak/gagal."; document.getElementById('statusMsg').style.color = "#f87171"; },
+          { enableHighAccuracy: true }
+        );
+      }
+      
+      // 2. Kamera
+      const video = document.getElementById('video');
+      navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } })
+        .then(stream => { video.srcObject = stream; })
+        .catch(err => Swal.fire('Kamera Error', 'Mohon izinkan akses kamera di browser Anda.', 'error'));
+    }
+
+    // --- FUNGSI SUBMIT ABSEN & WATERMARK ---
+    async function submitPresensi() {
+      if (!userLat) return Swal.fire('GPS Belum Siap', 'Tunggu hingga GPS aktif atau izinkan akses lokasi.', 'warning');
+
+      const video = document.getElementById('video');
+      const canvas = document.getElementById('canvas');
+      const type = document.getElementById('type').value;
+      
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      const ctx = canvas.getContext('2d');
+      
+      // Gambar dari kamera
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      
+      // TAMBAHKAN WATERMARK LOKASI & WAKTU KE FOTO
+      ctx.fillStyle = "rgba(0, 0, 0, 0.6)"; 
+      ctx.fillRect(0, canvas.height - 60, canvas.width, 60);
+      
+      ctx.font = "16px Arial";
+      ctx.fillStyle = "#ffffff";
+      const timeStr = "Waktu: " + new Date().toLocaleString('id-ID');
+      const locStr = `Lokasi: ${userLat.toFixed(5)}, ${userLng.toFixed(5)}`;
+      ctx.fillText(userName + " | " + type, 10, canvas.height - 40);
+      ctx.fillText(timeStr + " | " + locStr, 10, canvas.height - 15);
+
+      // Convert ke base64 (Format JPG lebih ringan)
+      const photoData = canvas.toDataURL('image/jpeg', 0.8);
+
+      const payload = {
+        action: 'attend', name: userName, type: type, lat: userLat, lng: userLng, photo: photoData
+      };
+
+      const res = await sendData(payload, 'submitBtn', 'Mengupload Data... ⏳');
+      if (res && res.success) {
+        Swal.fire('Berhasil!', res.message, 'success');
+      } else if (res) {
+        Swal.fire('Gagal', res.message, 'error');
+      }
+    }
+  </script>
+</body>
+</html>
