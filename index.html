@@ -37,6 +37,9 @@
     .history-box h3 { font-size: 14px; margin-bottom: 10px; color: #cbd5e1; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 5px; }
     .history-list { list-style: none; font-size: 12px; color: #94a3b8; }
     .history-list li { margin-bottom: 6px; padding-bottom: 6px; border-bottom: 1px dashed rgba(255,255,255,0.1); }
+
+    /* Container untuk Maps */
+    #mapView { display: none; width: 100%; border-radius: 10px; overflow: hidden; margin-bottom: 15px; border: 1px solid rgba(255,255,255,0.2); }
   </style>
 </head>
 <body>
@@ -44,7 +47,7 @@
   <div class="glass-card" id="loginCard">
     <img src="https://drive.google.com/thumbnail?id=1zHUoEV99QjdI2T8hJpR_TPxpJJySUMh8&sz=w500" alt="Logo" class="logo">
     <h2>Login Presensi</h2>
-    <div class="form-group"><label>Email</label><input type="email" id="logEmail" placeholder="email@paragon.com"></div>
+    <div class="form-group"><label>Email</label><input type="email" id="logEmail" placeholder="email@paracorpgroup.com"></div>
     <div class="form-group"><label>Password</label><input type="password" id="logPass" placeholder="******"></div>
     <button class="btn" id="btnLogin" onclick="login()">Masuk</button>
     <span class="link" onclick="toggleView('registerCard')">Belum punya akun? Buat Akun</span>
@@ -81,18 +84,18 @@
       <canvas id="canvas"></canvas>
     </div>
 
-    <div class="status-text" id="statusMsg" style="margin-bottom: 15px;">Mencari lokasi GPS... 📍</div>
+    <div class="status-text" id="statusMsg" style="margin-bottom: 15px;">Mencari lokasi GPS... ⏳</div>
+    
+    <!-- Fitur Baru: Tampilan Maps Langsung -->
+    <div id="mapView"></div>
 
-    <!-- Tombol Ambil Foto Awal -->
     <button class="btn" id="btnCapture" onclick="capturePhoto()">📸 Ambil Foto</button>
 
-    <!-- Area Tombol Setelah Difoto -->
     <div id="btnActionArea" style="display: none; justify-content: space-between; margin-top: 10px;">
       <button class="btn btn-secondary" onclick="retakePhoto()" style="flex: 1;">🔄 Ulangi</button>
       <button class="btn btn-success" id="btnSubmit" onclick="submitPresensi()" style="flex: 2;">🚀 Kirim Presensi</button>
     </div>
 
-    <!-- Area History Lokal -->
     <div class="history-box">
       <h3>Riwayat Perangkat Ini</h3>
       <ul class="history-list" id="historyList"></ul>
@@ -119,7 +122,6 @@
       document.getElementById(viewId).style.display = 'block';
     }
 
-    // --- FUNGSI JARINGAN ---
     async function sendData(payload, btnId, loadingText) {
       const btn = document.getElementById(btnId);
       const originalText = btn.innerHTML;
@@ -128,7 +130,7 @@
       try {
         const res = await fetch(SCRIPT_URL, {
           method: "POST",
-          redirect: "follow", // PENTING: Mencegah Error Network
+          redirect: "follow",
           headers: { "Content-Type": "text/plain;charset=utf-8" },
           body: JSON.stringify(payload)
         });
@@ -171,12 +173,25 @@
 
     function logout() { localStorage.removeItem("userName"); window.location.reload(); }
 
-    // --- FUNGSI HARDWARE (Kamera & GPS) ---
     function initHardware() {
       if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(
-          pos => { userLat = pos.coords.latitude; userLng = pos.coords.longitude; document.getElementById('statusMsg').innerHTML = "📍 GPS Siap!"; document.getElementById('statusMsg').style.color = "#4ade80"; },
-          err => { document.getElementById('statusMsg').innerHTML = "❌ Izin lokasi ditolak/gagal."; document.getElementById('statusMsg').style.color = "#f87171"; },
+          pos => { 
+            userLat = pos.coords.latitude; 
+            userLng = pos.coords.longitude; 
+            
+            // Tampilkan status dan Embed Google Maps
+            document.getElementById('statusMsg').innerHTML = "📍 GPS Siap! Cek lokasi Anda di bawah:"; 
+            document.getElementById('statusMsg').style.color = "#4ade80"; 
+            
+            const mapView = document.getElementById('mapView');
+            mapView.innerHTML = `<iframe width="100%" height="200" style="border:0; display:block;" loading="lazy" allowfullscreen src="https://maps.google.com/maps?q=${userLat},${userLng}&hl=id&z=16&output=embed"></iframe>`;
+            mapView.style.display = 'block';
+          },
+          err => { 
+            document.getElementById('statusMsg').innerHTML = "❌ Izin lokasi ditolak/gagal."; 
+            document.getElementById('statusMsg').style.color = "#f87171"; 
+          },
           { enableHighAccuracy: true }
         );
       }
@@ -185,7 +200,6 @@
         .catch(err => Swal.fire('Kamera Error', 'Mohon izinkan akses kamera.', 'error'));
     }
 
-    // --- FUNGSI CAPTURE & HISTORY ---
     function capturePhoto() {
       if (!userLat) return Swal.fire('GPS Belum Siap', 'Tunggu hingga GPS aktif atau izinkan akses lokasi.', 'warning');
       
@@ -193,7 +207,6 @@
       const canvas = document.getElementById('canvas');
       const type = document.getElementById('type').value;
       
-      // KOMPRESI SUPER KECIL AGAR TIDAK LEMOT (Max width 400px)
       const MAX_WIDTH = 400; 
       const scale = MAX_WIDTH / video.videoWidth;
       canvas.width = MAX_WIDTH;
@@ -202,7 +215,6 @@
       const ctx = canvas.getContext('2d');
       ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
       
-      // Watermark
       ctx.fillStyle = "rgba(0, 0, 0, 0.6)"; 
       ctx.fillRect(0, canvas.height - 50, canvas.width, 50);
       ctx.font = "12px Arial"; ctx.fillStyle = "#ffffff";
@@ -210,14 +222,15 @@
       ctx.fillText(userName + " | " + type, 10, canvas.height - 30);
       ctx.fillText(timeStr + " | " + userLat.toFixed(5) + "," + userLng.toFixed(5), 10, canvas.height - 10);
 
-      // Simpan Base64 ke memori dengan quality 60%
       finalPhotoData = canvas.toDataURL('image/jpeg', 0.6);
 
-      // Switch UI
       video.style.display = 'none';
       canvas.style.display = 'block';
       document.getElementById('btnCapture').style.display = 'none';
       document.getElementById('btnActionArea').style.display = 'flex';
+      
+      // Sembunyikan maps saat preview foto agar UI tidak terlalu panjang
+      document.getElementById('mapView').style.display = 'none';
     }
 
     function retakePhoto() {
@@ -225,6 +238,7 @@
       document.getElementById('canvas').style.display = 'none';
       document.getElementById('btnCapture').style.display = 'block';
       document.getElementById('btnActionArea').style.display = 'none';
+      document.getElementById('mapView').style.display = 'block';
       finalPhotoData = null;
     }
 
@@ -237,7 +251,7 @@
       if (res && res.success) {
         Swal.fire('Berhasil!', res.message, 'success');
         saveHistory(type, res.timestamp || new Date().toLocaleString('id-ID'));
-        retakePhoto(); // Reset tampilan ke kamera lagi
+        retakePhoto(); 
       } else if (res) {
         Swal.fire('Gagal', res.message, 'error');
       }
@@ -246,7 +260,7 @@
     function saveHistory(type, time) {
       let hist = JSON.parse(localStorage.getItem('hist_' + userName)) || [];
       hist.unshift({ type, time });
-      if(hist.length > 5) hist.pop(); // Batasi cuma simpan 5 terakhir
+      if(hist.length > 5) hist.pop(); 
       localStorage.setItem('hist_' + userName, JSON.stringify(hist));
       renderHistory();
     }
