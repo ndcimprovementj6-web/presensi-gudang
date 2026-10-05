@@ -160,7 +160,7 @@
 
     async function register() {
       const name = document.getElementById('regName').value;
-      const email = document.getElementById('regEmail').value;
+      const email = document.getElementById('regEmail').value.trim().toLowerCase();
       const pass = document.getElementById('regPass').value;
       if(!name || !email || !pass) return Swal.fire('Oops','Lengkapi semua data','warning');
 
@@ -173,7 +173,7 @@
     }
 
     async function login() {
-      const email = document.getElementById('logEmail').value;
+      const email = document.getElementById('logEmail').value.trim().toLowerCase();
       const pass = document.getElementById('logPass').value;
       if(!email || !pass) return Swal.fire('Oops','Isi email dan password','warning');
 
@@ -220,26 +220,30 @@
       const canvas = document.getElementById('canvas');
       const type = document.getElementById('type').value;
       
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
+      // KUNCI AGAR TIDAK LEMOT: Kompres resolusi kamera sebelum diupload
+      const MAX_WIDTH = 640; 
+      const scale = MAX_WIDTH / video.videoWidth;
+      canvas.width = MAX_WIDTH;
+      canvas.height = video.videoHeight * scale;
+      
       const ctx = canvas.getContext('2d');
       
-      // Gambar dari kamera
+      // Gambar dari kamera dengan ukuran yang sudah diperkecil
       ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
       
       // TAMBAHKAN WATERMARK LOKASI & WAKTU KE FOTO
       ctx.fillStyle = "rgba(0, 0, 0, 0.6)"; 
       ctx.fillRect(0, canvas.height - 60, canvas.width, 60);
       
-      ctx.font = "16px Arial";
+      ctx.font = "14px Arial";
       ctx.fillStyle = "#ffffff";
       const timeStr = "Waktu: " + new Date().toLocaleString('id-ID');
       const locStr = `Lokasi: ${userLat.toFixed(5)}, ${userLng.toFixed(5)}`;
       ctx.fillText(userName + " | " + type, 10, canvas.height - 40);
       ctx.fillText(timeStr + " | " + locStr, 10, canvas.height - 15);
 
-      // Convert ke base64 (Format JPG lebih ringan)
-      const photoData = canvas.toDataURL('image/jpeg', 0.8);
+      // Convert ke base64 dengan kompresi kualitas 70% (0.7) agar file sangat ringan
+      const photoData = canvas.toDataURL('image/jpeg', 0.7);
 
       const payload = {
         action: 'attend', name: userName, type: type, lat: userLat, lng: userLng, photo: photoData
