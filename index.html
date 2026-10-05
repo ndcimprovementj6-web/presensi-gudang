@@ -7,91 +7,61 @@
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
-    body {
-      background: linear-gradient(135deg, #0b192c 0%, #1a365d 100%);
-      color: #fff; min-height: 100vh;
-      display: flex; justify-content: center; align-items: center; padding: 20px;
-    }
-    .glass-card {
-      background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(15px);
-      border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 20px;
-      padding: 30px; width: 100%; max-width: 450px; text-align: center;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.3);
-    }
+    body { background: linear-gradient(135deg, #0b192c 0%, #1a365d 100%); color: #fff; min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 20px; }
+    .glass-card { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 20px; padding: 30px; width: 100%; max-width: 450px; text-align: center; box-shadow: 0 8px 32px rgba(0,0,0,0.3); }
     .logo { max-width: 130px; margin-bottom: 20px; }
     h2 { font-size: 20px; margin-bottom: 25px; color: #e2e8f0; }
     .form-group { margin-bottom: 15px; text-align: left; }
     label { display: block; margin-bottom: 8px; font-size: 13px; color: #cbd5e1; }
-    input, select {
-      width: 100%; padding: 12px; background: rgba(255, 255, 255, 0.1);
-      border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 10px; color: #fff;
-      font-size: 15px; outline: none; transition: 0.3s;
-    }
+    input, select { width: 100%; padding: 12px; background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 10px; color: #fff; font-size: 15px; outline: none; transition: 0.3s; }
     input:focus, select:focus { border-color: #60a5fa; background: rgba(255,255,255, 0.15); }
     option { background: #1a365d; color: #fff; }
     
-    .btn {
-      width: 100%; padding: 14px; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-      border: none; border-radius: 10px; color: white; font-weight: bold; cursor: pointer;
-      margin-top: 10px; transition: 0.3s;
-    }
+    .btn { width: 100%; padding: 14px; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); border: none; border-radius: 10px; color: white; font-weight: bold; cursor: pointer; margin-top: 10px; transition: 0.3s; }
     .btn:hover { background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%); }
     .btn:disabled { background: #64748b; cursor: not-allowed; }
-    .link { color: #60a5fa; cursor: pointer; font-size: 13px; margin-top: 15px; display: block; text-decoration: underline; }
     
-    /* Area Kamera */
-    .camera-container {
-      width: 100%; border-radius: 10px; overflow: hidden; margin-bottom: 15px;
-      border: 1px solid rgba(255,255,255,0.2); position: relative; background: #000;
-    }
-    video { width: 100%; display: block; }
+    .btn-secondary { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.3); margin-right: 10px; }
+    .btn-secondary:hover { background: rgba(255,255,255,0.2); }
+    .btn-success { background: linear-gradient(135deg, #10b981 0%, #059669 100%); }
+    .btn-success:hover { background: linear-gradient(135deg, #34d399 0%, #10b981 100%); }
+    
+    .link { color: #60a5fa; cursor: pointer; font-size: 13px; margin-top: 15px; display: block; text-decoration: underline; }
+    .camera-container { width: 100%; border-radius: 10px; overflow: hidden; margin-bottom: 15px; border: 1px solid rgba(255,255,255,0.2); position: relative; background: #000; min-height: 250px;}
+    video, canvas { width: 100%; display: block; }
     canvas { display: none; }
     .status-text { font-size: 12px; margin-top: 10px; color: #94a3b8; }
     .user-info { background: rgba(0,0,0,0.3); padding: 10px; border-radius: 10px; margin-bottom: 15px; font-size: 14px; }
+    
+    .history-box { margin-top: 20px; text-align: left; background: rgba(0,0,0,0.2); padding: 15px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.05); }
+    .history-box h3 { font-size: 14px; margin-bottom: 10px; color: #cbd5e1; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 5px; }
+    .history-list { list-style: none; font-size: 12px; color: #94a3b8; }
+    .history-list li { margin-bottom: 6px; padding-bottom: 6px; border-bottom: 1px dashed rgba(255,255,255,0.1); }
   </style>
 </head>
 <body>
 
-  <!-- LAYER LOGIN -->
   <div class="glass-card" id="loginCard">
     <img src="https://drive.google.com/thumbnail?id=1zHUoEV99QjdI2T8hJpR_TPxpJJySUMh8&sz=w500" alt="Logo" class="logo">
     <h2>Login Presensi</h2>
-    <div class="form-group">
-      <label>Email</label>
-      <input type="email" id="logEmail" placeholder="email@paracorpgroup.com">
-    </div>
-    <div class="form-group">
-      <label>Password</label>
-      <input type="password" id="logPass" placeholder="******">
-    </div>
+    <div class="form-group"><label>Email</label><input type="email" id="logEmail" placeholder="email@paragon.com"></div>
+    <div class="form-group"><label>Password</label><input type="password" id="logPass" placeholder="******"></div>
     <button class="btn" id="btnLogin" onclick="login()">Masuk</button>
     <span class="link" onclick="toggleView('registerCard')">Belum punya akun? Buat Akun</span>
   </div>
 
-  <!-- LAYER REGISTER -->
   <div class="glass-card" id="registerCard" style="display: none;">
     <img src="https://drive.google.com/thumbnail?id=1zHUoEV99QjdI2T8hJpR_TPxpJJySUMh8&sz=w500" alt="Logo" class="logo">
     <h2>Buat Akun Baru</h2>
-    <div class="form-group">
-      <label>Nama Lengkap</label>
-      <input type="text" id="regName" placeholder="Nama sesuai KTP/ID">
-    </div>
-    <div class="form-group">
-      <label>Email</label>
-      <input type="email" id="regEmail" placeholder="email@paragon.com">
-    </div>
-    <div class="form-group">
-      <label>Password</label>
-      <input type="password" id="regPass" placeholder="******">
-    </div>
+    <div class="form-group"><label>Nama Lengkap</label><input type="text" id="regName" placeholder="Nama sesuai KTP"></div>
+    <div class="form-group"><label>Email</label><input type="email" id="regEmail" placeholder="email@paragon.com"></div>
+    <div class="form-group"><label>Password</label><input type="password" id="regPass" placeholder="******"></div>
     <button class="btn" id="btnReg" onclick="register()">Daftar</button>
     <span class="link" onclick="toggleView('loginCard')">Sudah punya akun? Login</span>
   </div>
 
-  <!-- LAYER PRESENSI (UTAMA) -->
   <div class="glass-card" id="appCard" style="display: none;">
-    <img src="https://drive.google.com/thumbnail?id=1zHUoEV99QjdI2T8hJpR_TPxpJJySUMh8&sz=w500" alt="Logo" class="logo">
-    <h2>Presensi Gudang Sewa</h2>
+    <img src="https://drive.google.com/thumbnail?id=1zHUoEV99QjdI2T8hJpR_TPxpJJySUMh8&sz=w500" alt="Logo" class="logo" style="max-width: 100px; margin-bottom: 10px;">
     
     <div class="user-info">
       Operator: <b id="displayUser"></b> <br>
@@ -111,22 +81,35 @@
       <canvas id="canvas"></canvas>
     </div>
 
-    <button class="btn" id="submitBtn" onclick="submitPresensi()">📸 Ambil Foto & Submit</button>
-    <div class="status-text" id="statusMsg">Mencari lokasi GPS... 📍</div>
+    <div class="status-text" id="statusMsg" style="margin-bottom: 15px;">Mencari lokasi GPS... 📍</div>
+
+    <!-- Tombol Ambil Foto Awal -->
+    <button class="btn" id="btnCapture" onclick="capturePhoto()">📸 Ambil Foto</button>
+
+    <!-- Area Tombol Setelah Difoto -->
+    <div id="btnActionArea" style="display: none; justify-content: space-between; margin-top: 10px;">
+      <button class="btn btn-secondary" onclick="retakePhoto()" style="flex: 1;">🔄 Ulangi</button>
+      <button class="btn btn-success" id="btnSubmit" onclick="submitPresensi()" style="flex: 2;">🚀 Kirim Presensi</button>
+    </div>
+
+    <!-- Area History Lokal -->
+    <div class="history-box">
+      <h3>Riwayat Perangkat Ini</h3>
+      <ul class="history-list" id="historyList"></ul>
+    </div>
   </div>
 
   <script>
-    // URL API sudah terpasang di bawah ini
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyjFOwDPUh0EPzSSHy4JgqZaZU1x6bVeUZUqQzcVPzGaO56qrgcXE2HelTks3MvO3T8/exec";
-
     let userName = localStorage.getItem("userName");
     let userLat = null, userLng = null;
+    let finalPhotoData = null;
 
-    // Cek Sesi Login saat buka web
     if(userName) {
       toggleView('appCard');
       document.getElementById('displayUser').innerText = userName;
       initHardware();
+      renderHistory();
     }
 
     function toggleView(viewId) {
@@ -136,7 +119,7 @@
       document.getElementById(viewId).style.display = 'block';
     }
 
-    // --- FUNGSI AUTH ---
+    // --- FUNGSI JARINGAN ---
     async function sendData(payload, btnId, loadingText) {
       const btn = document.getElementById(btnId);
       const originalText = btn.innerHTML;
@@ -145,7 +128,8 @@
       try {
         const res = await fetch(SCRIPT_URL, {
           method: "POST",
-          headers: { "Content-Type": "text/plain" },
+          redirect: "follow", // PENTING: Mencegah Error Network
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
           body: JSON.stringify(payload)
         });
         const data = await res.json();
@@ -153,27 +137,24 @@
         return data;
       } catch(e) {
         btn.disabled = false; btn.innerHTML = originalText;
-        Swal.fire('Error Network', 'Gagal menghubungi server.', 'error');
+        Swal.fire('Error Network', 'Koneksi terputus atau Script perlu di-Deploy ulang (Versi Baru).', 'error');
         return null;
       }
     }
 
     async function register() {
       const name = document.getElementById('regName').value;
-      const email = document.getElementById('regEmail').value.trim().toLowerCase();
+      const email = document.getElementById('regEmail').value;
       const pass = document.getElementById('regPass').value;
       if(!name || !email || !pass) return Swal.fire('Oops','Lengkapi semua data','warning');
 
       const res = await sendData({ action: 'register', name, email, password: pass }, 'btnReg', 'Mendaftar...');
-      if(res && res.success) {
-        Swal.fire('Berhasil!', res.message, 'success').then(() => toggleView('loginCard'));
-      } else if (res) {
-        Swal.fire('Gagal', res.message, 'error');
-      }
+      if(res && res.success) Swal.fire('Berhasil!', res.message, 'success').then(() => toggleView('loginCard'));
+      else if (res) Swal.fire('Gagal', res.message, 'error');
     }
 
     async function login() {
-      const email = document.getElementById('logEmail').value.trim().toLowerCase();
+      const email = document.getElementById('logEmail').value;
       const pass = document.getElementById('logPass').value;
       if(!email || !pass) return Swal.fire('Oops','Isi email dan password','warning');
 
@@ -184,19 +165,14 @@
         document.getElementById('displayUser').innerText = userName;
         toggleView('appCard');
         initHardware();
-      } else if(res) {
-        Swal.fire('Gagal', res.message, 'error');
-      }
+        renderHistory();
+      } else if(res) Swal.fire('Gagal', res.message, 'error');
     }
 
-    function logout() {
-      localStorage.removeItem("userName");
-      window.location.reload();
-    }
+    function logout() { localStorage.removeItem("userName"); window.location.reload(); }
 
     // --- FUNGSI HARDWARE (Kamera & GPS) ---
     function initHardware() {
-      // 1. GPS
       if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(
           pos => { userLat = pos.coords.latitude; userLng = pos.coords.longitude; document.getElementById('statusMsg').innerHTML = "📍 GPS Siap!"; document.getElementById('statusMsg').style.color = "#4ade80"; },
@@ -204,57 +180,88 @@
           { enableHighAccuracy: true }
         );
       }
-      
-      // 2. Kamera
-      const video = document.getElementById('video');
       navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } })
-        .then(stream => { video.srcObject = stream; })
-        .catch(err => Swal.fire('Kamera Error', 'Mohon izinkan akses kamera di browser Anda.', 'error'));
+        .then(stream => { document.getElementById('video').srcObject = stream; })
+        .catch(err => Swal.fire('Kamera Error', 'Mohon izinkan akses kamera.', 'error'));
     }
 
-    // --- FUNGSI SUBMIT ABSEN & WATERMARK ---
-    async function submitPresensi() {
+    // --- FUNGSI CAPTURE & HISTORY ---
+    function capturePhoto() {
       if (!userLat) return Swal.fire('GPS Belum Siap', 'Tunggu hingga GPS aktif atau izinkan akses lokasi.', 'warning');
-
+      
       const video = document.getElementById('video');
       const canvas = document.getElementById('canvas');
       const type = document.getElementById('type').value;
       
-      // KUNCI AGAR TIDAK LEMOT: Kompres resolusi kamera sebelum diupload
-      const MAX_WIDTH = 640; 
+      // KOMPRESI SUPER KECIL AGAR TIDAK LEMOT (Max width 400px)
+      const MAX_WIDTH = 400; 
       const scale = MAX_WIDTH / video.videoWidth;
       canvas.width = MAX_WIDTH;
       canvas.height = video.videoHeight * scale;
       
       const ctx = canvas.getContext('2d');
-      
-      // Gambar dari kamera dengan ukuran yang sudah diperkecil
       ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
       
-      // TAMBAHKAN WATERMARK LOKASI & WAKTU KE FOTO
+      // Watermark
       ctx.fillStyle = "rgba(0, 0, 0, 0.6)"; 
-      ctx.fillRect(0, canvas.height - 60, canvas.width, 60);
-      
-      ctx.font = "14px Arial";
-      ctx.fillStyle = "#ffffff";
-      const timeStr = "Waktu: " + new Date().toLocaleString('id-ID');
-      const locStr = `Lokasi: ${userLat.toFixed(5)}, ${userLng.toFixed(5)}`;
-      ctx.fillText(userName + " | " + type, 10, canvas.height - 40);
-      ctx.fillText(timeStr + " | " + locStr, 10, canvas.height - 15);
+      ctx.fillRect(0, canvas.height - 50, canvas.width, 50);
+      ctx.font = "12px Arial"; ctx.fillStyle = "#ffffff";
+      const timeStr = new Date().toLocaleString('id-ID');
+      ctx.fillText(userName + " | " + type, 10, canvas.height - 30);
+      ctx.fillText(timeStr + " | " + userLat.toFixed(5) + "," + userLng.toFixed(5), 10, canvas.height - 10);
 
-      // Convert ke base64 dengan kompresi kualitas 70% (0.7) agar file sangat ringan
-      const photoData = canvas.toDataURL('image/jpeg', 0.7);
+      // Simpan Base64 ke memori dengan quality 60%
+      finalPhotoData = canvas.toDataURL('image/jpeg', 0.6);
 
-      const payload = {
-        action: 'attend', name: userName, type: type, lat: userLat, lng: userLng, photo: photoData
-      };
+      // Switch UI
+      video.style.display = 'none';
+      canvas.style.display = 'block';
+      document.getElementById('btnCapture').style.display = 'none';
+      document.getElementById('btnActionArea').style.display = 'flex';
+    }
 
-      const res = await sendData(payload, 'submitBtn', 'Mengupload Data... ⏳');
+    function retakePhoto() {
+      document.getElementById('video').style.display = 'block';
+      document.getElementById('canvas').style.display = 'none';
+      document.getElementById('btnCapture').style.display = 'block';
+      document.getElementById('btnActionArea').style.display = 'none';
+      finalPhotoData = null;
+    }
+
+    async function submitPresensi() {
+      if (!finalPhotoData) return;
+      const type = document.getElementById('type').value;
+      const payload = { action: 'attend', name: userName, type: type, lat: userLat, lng: userLng, photo: finalPhotoData };
+
+      const res = await sendData(payload, 'btnSubmit', 'Mengupload... ⏳');
       if (res && res.success) {
         Swal.fire('Berhasil!', res.message, 'success');
+        saveHistory(type, res.timestamp || new Date().toLocaleString('id-ID'));
+        retakePhoto(); // Reset tampilan ke kamera lagi
       } else if (res) {
         Swal.fire('Gagal', res.message, 'error');
       }
+    }
+
+    function saveHistory(type, time) {
+      let hist = JSON.parse(localStorage.getItem('hist_' + userName)) || [];
+      hist.unshift({ type, time });
+      if(hist.length > 5) hist.pop(); // Batasi cuma simpan 5 terakhir
+      localStorage.setItem('hist_' + userName, JSON.stringify(hist));
+      renderHistory();
+    }
+
+    function renderHistory() {
+      let hist = JSON.parse(localStorage.getItem('hist_' + userName)) || [];
+      const list = document.getElementById('historyList');
+      list.innerHTML = '';
+      if(hist.length === 0) {
+        list.innerHTML = '<li>Belum ada absen di perangkat ini.</li>'; return;
+      }
+      hist.forEach(h => {
+        const color = h.type === 'IN' ? '#4ade80' : '#f87171';
+        list.innerHTML += `<li><b style="color:${color}">[${h.type}]</b> ${h.time}</li>`;
+      });
     }
   </script>
 </body>
