@@ -9,7 +9,7 @@
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
     body { background: linear-gradient(135deg, #0b192c 0%, #1a365d 100%); color: #fff; min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 20px; }
     .glass-card { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 20px; padding: 25px; width: 100%; max-width: 480px; text-align: center; box-shadow: 0 8px 32px rgba(0,0,0,0.3); }
-    .glass-card.wide { max-width: 800px; }
+    .glass-card.wide { max-width: 850px; }
     .logo { max-width: 120px; margin-bottom: 15px; }
     h2 { font-size: 19px; margin-bottom: 20px; color: #e2e8f0; }
     .form-group { margin-bottom: 15px; text-align: left; }
@@ -23,7 +23,8 @@
     .btn:disabled { background: #64748b; cursor: not-allowed; }
     .btn-secondary { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.3); margin-right: 10px; }
     .btn-success { background: linear-gradient(135deg, #10b981 0%, #059669 100%); }
-    
+    .btn-add { background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%); margin-bottom: 15px; width: auto; padding: 10px 20px; font-size: 13px; display: inline-block; }
+
     .link { color: #60a5fa; cursor: pointer; font-size: 13px; margin-top: 15px; display: block; text-decoration: underline; }
     .camera-container { width: 100%; border-radius: 10px; overflow: hidden; margin-bottom: 12px; border: 1px solid rgba(255,255,255,0.2); position: relative; background: #000; min-height: 220px;}
     video, canvas { width: 100%; display: block; }
@@ -88,8 +89,8 @@
     </div>
 
     <div class="history-box">
-      <h3><span>📜 Riwayat Hari Ini</span></h3>
-      <ul class="history-list" id="historyList"></ul>
+      <h3><span>📜 Riwayat Hari Ini (Sinkron Server)</span></h3>
+      <ul class="history-list" id="historyList"><li>Memuat riwayat...</li></ul>
     </div>
 
     <div class="form-group">
@@ -144,15 +145,25 @@
 
     <!-- TAB 1: LAPORAN -->
     <div id="reportTab">
-      <div class="form-group" style="display: flex; gap: 10px; align-items: center;">
-        <label style="margin:0;">Filter Shift:</label>
-        <select id="filterShift" onchange="renderReport()" style="padding: 6px;">
-          <option value="ALL">Semua Shift</option>
-          <option value="Shift Pagi">Shift Pagi</option>
-          <option value="Shift Siang">Shift Siang</option>
-          <option value="Shift Malam">Shift Malam</option>
-        </select>
+      <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 15px; flex-wrap: wrap;">
+        <div>
+          <label style="margin:0; text-align:left;">Filter Shift:</label>
+          <select id="filterShift" onchange="renderReport()" style="padding: 6px; margin-top: 5px;">
+            <option value="ALL">Semua Shift</option>
+            <option value="Shift Pagi">Shift Pagi</option>
+            <option value="Shift Siang">Shift Siang</option>
+            <option value="Shift Malam">Shift Malam</option>
+          </select>
+        </div>
+        <div>
+          <label style="margin:0; text-align:left;">Filter Tanggal:</label>
+          <input type="date" id="filterDate" onchange="renderReport()" style="padding: 6px; margin-top: 5px; background: rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.2); color:#fff; border-radius:8px;">
+        </div>
+        <div style="align-self: flex-end;">
+          <button class="action-btn" style="padding: 10px; background:#64748b;" onclick="resetFilter()">Reset Filter</button>
+        </div>
       </div>
+
       <div class="table-container">
         <table>
           <thead>
@@ -171,8 +182,9 @@
       </div>
     </div>
 
-    <!-- TAB 2: USERS & RESET PASSWORD -->
-    <div id="usersTab" style="display: none;">
+    <!-- TAB 2: USERS & TAMBAH AKUN -->
+    <div id="usersTab" style="display: none; text-align: left;">
+      <button class="btn-add" onclick="promptAddUser()">➕ Tambah Akun Operator</button>
       <div class="table-container">
         <table>
           <thead>
@@ -209,8 +221,7 @@
         toggleView('appCard');
         document.getElementById('displayUser').innerText = userName;
         initHardware();
-        checkAndCleanHistory();
-        renderHistory();
+        fetchOperatorHistory();
       }
     }
 
@@ -274,8 +285,7 @@
           toggleView('appCard');
           document.getElementById('displayUser').innerText = res.name;
           initHardware();
-          checkAndCleanHistory();
-          renderHistory();
+          fetchOperatorHistory();
         }
       } else if(res) Swal.fire('Gagal', res.message, 'error');
     }
@@ -377,42 +387,28 @@
 
       const res = await sendData(payload, 'btnSubmit', 'Mengupload... ⏳');
       if (res && res.success) {
-        Swal.fire('Berhasil!', res.message + '\nBukti presensi otomatis dikirim ke email Anda.', 'success');
-        saveHistory(type, res.timestamp || new Date().toLocaleString('id-ID'));
+        Swal.fire('Berhasil!', res.message + '\nBukti dikirim ke email Anda.', 'success');
+        fetchOperatorHistory(); // Ambil ulang data terbaru dari server
         retakePhoto(); 
       } else if (res) {
         Swal.fire('Perhatian', res.message, 'warning');
       }
     }
 
-    function checkAndCleanHistory() {
-      let todayKey = new Date().toLocaleDateString();
-      let lastDate = localStorage.getItem('hist_date_' + userName);
-      if(lastDate !== todayKey) {
-        localStorage.removeItem('hist_' + userName);
-        localStorage.setItem('hist_date_' + userName, todayKey);
-      }
-    }
-
-    function saveHistory(type, time) {
-      let hist = JSON.parse(localStorage.getItem('hist_' + userName)) || [];
-      hist.unshift({ type, time });
-      if(hist.length > 5) hist.pop(); 
-      localStorage.setItem('hist_' + userName, JSON.stringify(hist));
-      renderHistory();
-    }
-
-    function renderHistory() {
-      let hist = JSON.parse(localStorage.getItem('hist_' + userName)) || [];
+    // FUNGSI TARIK RIWAYAT DARI GOOGLE SPREADSHEET
+    async function fetchOperatorHistory() {
+      const res = await sendData({ action: 'getOperatorHistory', name: userName }, null, '');
       const list = document.getElementById('historyList');
       list.innerHTML = '';
-      if(hist.length === 0) {
-        list.innerHTML = '<li>Belum ada riwayat hari ini.</li>'; return;
+
+      if (res && res.success && res.history.length > 0) {
+        res.history.forEach(h => {
+          const color = h.type === 'IN' ? '#4ade80' : '#f87171';
+          list.innerHTML += `<li><b style="color:${color}">[${h.type}]</b> ${h.time}</li>`;
+        });
+      } else {
+        list.innerHTML = '<li>Belum ada riwayat hari ini.</li>';
       }
-      hist.forEach(h => {
-        const color = h.type === 'IN' ? '#4ade80' : '#f87171';
-        list.innerHTML += `<li><b style="color:${color}">[${h.type}]</b> ${h.time}</li>`;
-      });
     }
 
     function switchTab(tabId) {
@@ -427,6 +423,10 @@
         renderReport();
       }
 
+      loadUsersTable();
+    }
+
+    async function loadUsersTable() {
       const resUsr = await sendData({ action: 'getUsers' }, null, '');
       if(resUsr && resUsr.success) {
         const tbody = document.getElementById('usersTableBody');
@@ -444,12 +444,25 @@
 
     function renderReport() {
       const shiftFilter = document.getElementById('filterShift').value;
+      const dateFilter = document.getElementById('filterDate').value; 
       const tbody = document.getElementById('reportTableBody');
       tbody.innerHTML = '';
 
       let filtered = globalReportData;
+
       if(shiftFilter !== 'ALL') {
-        filtered = globalReportData.filter(r => r.shift === shiftFilter);
+        filtered = filtered.filter(r => r.shift === shiftFilter);
+      }
+
+      if(dateFilter) {
+        filtered = filtered.filter(r => {
+          let parts = r.timestamp.split('/');
+          let formattedD = r.timestamp;
+          if(parts.length === 3) {
+            formattedD = `${parts[2]}-${parts[1]}-${parts[0]}`;
+          }
+          return formattedD === dateFilter;
+        });
       }
 
       if(filtered.length === 0) {
@@ -468,6 +481,12 @@
       });
     }
 
+    function resetFilter() {
+      document.getElementById('filterShift').value = 'ALL';
+      document.getElementById('filterDate').value = '';
+      renderReport();
+    }
+
     async function promptResetPassword(email) {
       const { value: newPass } = await Swal.fire({
         title: 'Reset Password untuk ' + email,
@@ -483,6 +502,38 @@
           Swal.fire('Berhasil', res.message, 'success');
         } else {
           Swal.fire('Gagal', res.message || 'Terjadi kesalahan', 'error');
+        }
+      }
+    }
+
+    async function promptAddUser() {
+      const { value: formValues } = await Swal.fire({
+        title: 'Tambah Akun Operator Baru',
+        html:
+          '<input id="swal-input1" class="swal2-input" placeholder="Nama Lengkap">' +
+          '<input id="swal-input2" class="swal2-input" placeholder="Email Operator">',
+        focusConfirm: false,
+        showCancelButton: true,
+        confirmButtonText: 'Simpan',
+        preConfirm: () => {
+          return [
+            document.getElementById('swal-input1').value,
+            document.getElementById('swal-input2').value
+          ]
+        }
+      });
+
+      if (formValues) {
+        const name = formValues[0];
+        const email = formValues[1];
+        if(!name || !email) return Swal.fire('Error', 'Nama dan Email wajib diisi!', 'error');
+
+        const res = await sendData({ action: 'addUser', name: name, email: email }, null, '');
+        if(res && res.success) {
+          Swal.fire('Berhasil', res.message, 'success');
+          loadUsersTable();
+        } else {
+          Swal.fire('Gagal', res.message || 'Gagal menambah user', 'error');
         }
       }
     }
