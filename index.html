@@ -89,7 +89,7 @@
     </div>
 
     <div class="history-box">
-      <h3><span>📜 Riwayat Hari Ini (Sinkron Server)</span></h3>
+      <h3><span>📜 Riwayat Hari Ini</span></h3>
       <ul class="history-list" id="historyList"><li>Memuat riwayat...</li></ul>
     </div>
 
@@ -212,7 +212,8 @@
     let finalPhotoData = null;
     let globalReportData = [];
 
-    if(userName) {
+    // Pengecekan sesi yang aman
+    if(userName && userName !== "null" && userName !== "undefined") {
       if(userRole === 'super') {
         toggleView('superCard');
         document.getElementById('displaySuperUser').innerText = userName;
@@ -223,6 +224,8 @@
         initHardware();
         fetchOperatorHistory();
       }
+    } else {
+      logout(); // Jika nama hilang/kosong, paksa ke halaman login
     }
 
     function toggleView(viewId) {
@@ -371,6 +374,10 @@
     }
 
     async function submitPresensi() {
+      if (!userName) {
+        Swal.fire('Sesi Habis', 'Silakan Login ulang.', 'warning').then(() => logout());
+        return;
+      }
       if (!finalPhotoData) return;
       const type = document.getElementById('type').value;
       const shift = document.getElementById('shift').value;
@@ -388,15 +395,15 @@
       const res = await sendData(payload, 'btnSubmit', 'Mengupload... ⏳');
       if (res && res.success) {
         Swal.fire('Berhasil!', res.message + '\nBukti dikirim ke email Anda.', 'success');
-        fetchOperatorHistory(); // Ambil ulang data terbaru dari server
+        fetchOperatorHistory(); 
         retakePhoto(); 
       } else if (res) {
         Swal.fire('Perhatian', res.message, 'warning');
       }
     }
 
-    // FUNGSI TARIK RIWAYAT DARI GOOGLE SPREADSHEET
     async function fetchOperatorHistory() {
+      if(!userName) return;
       const res = await sendData({ action: 'getOperatorHistory', name: userName }, null, '');
       const list = document.getElementById('historyList');
       list.innerHTML = '';
@@ -422,7 +429,6 @@
         globalReportData = resRep.report;
         renderReport();
       }
-
       loadUsersTable();
     }
 
