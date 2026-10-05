@@ -205,27 +205,34 @@
 
   <script>
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyjFOwDPUh0EPzSSHy4JgqZaZU1x6bVeUZUqQzcVPzGaO56qrgcXE2HelTks3MvO3T8/exec";
-    let userName = localStorage.getItem("userName");
-    let userRole = localStorage.getItem("userRole");
-    let userEmail = localStorage.getItem("userEmail");
     let userLat = null, userLng = null;
     let finalPhotoData = null;
     let globalReportData = [];
 
-    // PERBAIKAN UTAMA: Jika belum login, cukup tampilkan menu login, jangan reload halaman!
-    if(userName && userName !== "null" && userName !== "undefined" && userName !== "") {
-      if(userRole === 'super') {
+    // Fungsi bantu untuk mengambil sesi terbaru secara aman dari localStorage
+    function getSession() {
+      return {
+        name: localStorage.getItem("userName"),
+        role: localStorage.getItem("userRole"),
+        email: localStorage.getItem("userEmail")
+      };
+    }
+
+    let session = getSession();
+
+    if(session.name && session.name !== "null" && session.name !== "undefined" && session.name !== "") {
+      if(session.role === 'super') {
         toggleView('superCard');
-        document.getElementById('displaySuperUser').innerText = userName;
+        document.getElementById('displaySuperUser').innerText = session.name;
         loadSuperData();
       } else {
         toggleView('appCard');
-        document.getElementById('displayUser').innerText = userName;
+        document.getElementById('displayUser').innerText = session.name;
         initHardware();
         fetchOperatorHistory();
       }
     } else {
-      toggleView('loginCard'); // Aman, menampilkan halaman login tanpa memicu loop reload
+      toggleView('loginCard');
     }
 
     function toggleView(viewId) {
@@ -280,13 +287,16 @@
         localStorage.setItem("userRole", res.role);
         localStorage.setItem("userEmail", res.email);
         
-        if(res.role === 'super') {
+        // Perbarui objek sesi lokal
+        session = getSession();
+
+        if(session.role === 'super') {
           toggleView('superCard');
-          document.getElementById('displaySuperUser').innerText = res.name;
+          document.getElementById('displaySuperUser').innerText = session.name;
           loadSuperData();
         } else {
           toggleView('appCard');
-          document.getElementById('displayUser').innerText = res.name;
+          document.getElementById('displayUser').innerText = session.name;
           initHardware();
           fetchOperatorHistory();
         }
@@ -333,6 +343,7 @@
     }
 
     function capturePhoto() {
+      session = getSession();
       if (!userLat) return Swal.fire('GPS Belum Siap', 'Tunggu hingga GPS aktif atau izinkan akses lokasi.', 'warning');
       
       const video = document.getElementById('video');
@@ -352,7 +363,7 @@
       ctx.fillRect(0, canvas.height - 55, canvas.width, 55);
       ctx.font = "11px Arial"; ctx.fillStyle = "#ffffff";
       const timeStr = new Date().toLocaleString('id-ID');
-      ctx.fillText(`${userName} | ${type} (${type==='IN'?shift:''})`, 10, canvas.height - 35);
+      ctx.fillText(`${session.name} | ${type} (${type==='IN'?shift:''})`, 10, canvas.height - 35);
       ctx.fillText(`${timeStr} | ${userLat.toFixed(5)},${userLng.toFixed(5)}`, 10, canvas.height - 15);
 
       finalPhotoData = canvas.toDataURL('image/jpeg', 0.6);
@@ -374,7 +385,8 @@
     }
 
     async function submitPresensi() {
-      if (!userName) {
+      session = getSession();
+      if (!session.name || session.name === "null" || session.name === "undefined") {
         Swal.fire('Sesi Habis', 'Silakan Login ulang.', 'warning').then(() => logout());
         return;
       }
@@ -383,8 +395,8 @@
       const shift = document.getElementById('shift').value;
       const payload = { 
         action: 'attend', 
-        name: userName, 
-        email: userEmail, 
+        name: session.name, 
+        email: session.email, 
         type: type, 
         shift: shift, 
         lat: userLat, 
@@ -403,8 +415,9 @@
     }
 
     async function fetchOperatorHistory() {
-      if(!userName) return;
-      const res = await sendData({ action: 'getOperatorHistory', name: userName }, null, '');
+      session = getSession();
+      if(!session.name) return;
+      const res = await sendData({ action: 'getOperatorHistory', name: session.name }, null, '');
       const list = document.getElementById('historyList');
       list.innerHTML = '';
 
