@@ -212,8 +212,8 @@
     let finalPhotoData = null;
     let globalReportData = [];
 
-    // Pengecekan sesi yang aman
-    if(userName && userName !== "null" && userName !== "undefined") {
+    // PERBAIKAN UTAMA: Jika belum login, cukup tampilkan menu login, jangan reload halaman!
+    if(userName && userName !== "null" && userName !== "undefined" && userName !== "") {
       if(userRole === 'super') {
         toggleView('superCard');
         document.getElementById('displaySuperUser').innerText = userName;
@@ -225,7 +225,7 @@
         fetchOperatorHistory();
       }
     } else {
-      logout(); // Jika nama hilang/kosong, paksa ke halaman login
+      toggleView('loginCard'); // Aman, menampilkan halaman login tanpa memicu loop reload
     }
 
     function toggleView(viewId) {
